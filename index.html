@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoo Tycoon Clicker</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --card: #0f3460;
+    --accent: #e94560;
+    --gold: #f5a623;
+    --green: #4ecdc4;
+    --purple: #a855f7;
+    --purple-light: #c084fc;
+    --text: #f0f0f0;
+    --text-muted: #8892a4;
+    --border: rgba(255,255,255,0.08);
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(168,85,247,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(78,205,196,0.08) 0%, transparent 50%);
+  }
+ 
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+    position: relative;
+  }
+ 
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-shadow: 0 0 30px rgba(245,166,35,0.4);
+  }
+ 
+  header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+ 
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+  }
+ 
+  .topbar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+ 
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    text-align: center;
+  }
+ 
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+ 
+  .stat-val {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+ 
+  .section-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    margin-top: 1.5rem;
+  }
+ 
+  #click-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.08s, border-color 0.2s;
+  }
+ 
+  #click-area:hover { border-color: rgba(245,166,35,0.4); }
+  #click-area:active { transform: scale(0.97); }
+ 
+  #click-icon { font-size: 56px; display: block; margin-bottom: 6px; }
+  #click-sub { font-size: 13px; color: var(--text-muted); }
+  #click-reward { font-size: 15px; font-weight: 700; color: var(--green); min-height: 22px; margin-top: 4px; }
+ 
+  .animals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+ 
+  .animal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem 0.75rem;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.1s;
+  }
+ 
+  .animal-card:not(.locked):hover, .animal-card:not(.locked):active { border-color: rgba(78,205,196,0.4); transform: translateY(-2px); }
+  .animal-card.locked { opacity: 0.35; }
+ 
+  .animal-emoji { font-size: 34px; display: block; margin-bottom: 6px; }
+  .animal-name { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--text); }
+  .animal-owned { font-size: 12px; color: var(--text-muted); margin: 3px 0; }
+  .animal-income { font-size: 11px; color: var(--green); margin-bottom: 8px; }
+ 
+  .buy-btn {
+    width: 100%;
+    padding: 6px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    border-radius: 10px;
+    border: 1px solid rgba(78,205,196,0.4);
+    background: rgba(78,205,196,0.1);
+    color: var(--green);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+ 
+  .buy-btn:hover:not(:disabled) { background: rgba(78,205,196,0.2); }
+  .buy-btn:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--border); color: var(--text-muted); background: transparent; }
+ 
+  .upgrades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+ 
+  .upg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem 0.75rem;
+    transition: border-color 0.2s;
+  }
+ 
+  .upg-card:hover, .upg-card:active { border-color: rgba(245,166,35,0.3); }
+ 
+  .upg-name { font-family: 'Fredoka One', cursive; font-size: 0.95rem; color: var(--text); margin-bottom: 3px; }
+  .upg-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+ 
+  .upg-btn {
+    width: 100%;
+    padding: 6px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    border-radius: 10px;
+    border: 1px solid rgba(245,166,35,0.4);
+    background: rgba(245,166,35,0.1);
+    color: var(--gold);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+ 
+  .upg-btn:hover:not(:disabled) { background: rgba(245,166,35,0.2); }
+  .upg-btn:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--border); color: var(--text-muted); background: transparent; }
+  .upg-btn.bought { background: rgba(78,205,196,0.12); color: var(--green); border-color: rgba(78,205,196,0.3); cursor: default; opacity: 1; }
+ 
+  .rebirth-box {
+    background: var(--surface);
+    border: 1px solid rgba(168,85,247,0.35);
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+ 
+  .rebirth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+ 
+  .rebirth-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--purple-light);
+  }
+ 
+  .rebirth-badge {
+    font-size: 12px;
+    background: rgba(168,85,247,0.2);
+    color: var(--purple-light);
+    border-radius: 20px;
+    padding: 3px 12px;
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+ 
+  .rebirth-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+ 
+  .rebirth-desc strong { color: var(--purple-light); }
+ 
+  .rebirth-dots {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+ 
+  .rebirth-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(168,85,247,0.3);
+    background: transparent;
+    transition: background 0.3s;
+  }
+ 
+  .rebirth-dot.done { background: var(--purple); border-color: var(--purple); box-shadow: 0 0 8px rgba(168,85,247,0.5); }
+  .rebirth-dot.next { background: rgba(168,85,247,0.2); border-color: var(--purple-light); }
+ 
+  .rebirth-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    border-radius: 12px;
+    border: 1px solid rgba(168,85,247,0.5);
+    background: rgba(168,85,247,0.15);
+    color: var(--purple-light);
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.5px;
+  }
+ 
+  .rebirth-btn:hover:not(:disabled) { background: rgba(168,85,247,0.28); }
+  .rebirth-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .rebirth-btn.maxed { opacity: 1; background: rgba(168,85,247,0.25); cursor: default; color: var(--purple-light); }
+ 
+  .news-bar {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1rem;
+    min-height: 18px;
+    font-style: italic;
+  }
+ 
+  .float-coin {
+    position: absolute;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    pointer-events: none;
+    animation: floatUp 0.9s ease-out forwards;
+    text-shadow: 0 0 8px rgba(245,166,35,0.6);
+  }
+ 
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-50px) scale(0.8); }
+  }
+ 
+  @media (max-width: 768px) {
+    .animals-grid, .upgrades-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    .buy-btn:hover:not(:disabled), .upg-btn:hover:not(:disabled) { background: rgba(78,205,196,0.2); }
+  }
+  
+  @media (max-width: 500px) {
+    .topbar { grid-template-columns: repeat(2, 1fr); }
+    .animal-card, .upg-card {
+      padding: 1.2rem 0.75rem;
+    }
+    .buy-btn, .upg-btn {
+      padding: 10px 4px;
+      font-size: 14px;
+    }
+    #click-area {
+      padding: 2rem 1.5rem;
+    }
+    #click-icon {
+      font-size: 64px;
+    }
+    .stat-val {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+ 
+<header>
+  <h1>🦁 Zoo Tycoon Clicker</h1>
+  <p>Baue den größten Zoo der Welt!</p>
+</header>
+ 
+<div class="container">
+  <div class="topbar">
+    <div class="stat-card"><div class="stat-label">Geld</div><div class="stat-val" id="money">0 €</div></div>
+    <div class="stat-card"><div class="stat-label">Eink./s</div><div class="stat-val" id="income-ps">0 €</div></div>
+    <div class="stat-card"><div class="stat-label">Tiere</div><div class="stat-val" id="total-animals">0</div></div>
+    <div class="stat-card"><div class="stat-label">Rebirths</div><div class="stat-val" id="rebirth-count">0 / 10</div></div>
+  </div>
+ 
+  <div class="section-label">Klicke auf die Kasse um Geld zu verdienen</div>
+  <div id="click-area" onclick="doClick(event)">
+    <span id="click-icon">🎟️</span>
+    <div id="click-sub">Eintrittskasse</div>
+    <div id="click-reward"></div>
+  </div>
+ 
+  <div class="section-label" style="margin-top:1.5rem">Tiere kaufen</div>
+  <div class="animals-grid" id="animals-grid"></div>
+ 
+  <div class="section-label">Verbesserungen</div>
+  <div class="upgrades-grid" id="upgrades-grid"></div>
+ 
+  <div class="rebirth-box" id="rebirth-box"></div>
+ 
+  <div class="news-bar" id="news-bar">Willkommen in deinem Zoo! Fang mit einer Ente an.</div>
+</div>
+ 
+<script>
+const ANIMALS = [
+  {id:'duck',    emoji:'🦆', name:'Ente',     baseCost:10,     income:0.2,  unlockAt:0},
+  {id:'rabbit',  emoji:'🐰', name:'Hase',     baseCost:50,     income:0.8,  unlockAt:1},
+  {id:'deer',    emoji:'🦌', name:'Hirsch',   baseCost:200,    income:2.5,  unlockAt:3},
+  {id:'monkey',  emoji:'🐒', name:'Affe',     baseCost:800,    income:8,    unlockAt:8},
+  {id:'lion',    emoji:'🦁', name:'Löwe',     baseCost:3000,   income:25,   unlockAt:15},
+  {id:'elephant',emoji:'🐘', name:'Elefant',  baseCost:10000,  income:70,   unlockAt:25},
+  {id:'panda',   emoji:'🐼', name:'Panda',    baseCost:35000,  income:180,  unlockAt:40},
+  {id:'shark',   emoji:'🦈', name:'Hai',      baseCost:120000, income:500,  unlockAt:60},
+];
+ 
+const UPGRADES = [
+  {id:'snack', name:'Snackbude',   desc:'+2 € pro Klick',  cost:150,    effect:()=>{ clickBonus+=2; }},
+  {id:'sign',  name:'Werbeschild', desc:'2× Einkommen',    cost:500,    effect:()=>{ incomeMultiplier*=2; }},
+  {id:'train', name:'Zug-Tour',    desc:'+10 € pro Klick', cost:2000,   effect:()=>{ clickBonus+=10; }},
+  {id:'vip',   name:'VIP-Lounge',  desc:'3× Einkommen',    cost:8000,   effect:()=>{ incomeMultiplier*=3; }},
+  {id:'aqua',  name:'Aquarium',    desc:'+50 € pro Klick', cost:30000,  effect:()=>{ clickBonus+=50; }},
+  {id:'night', name:'Nacht-Zoo',   desc:'5× Einkommen',    cost:100000, effect:()=>{ incomeMultiplier*=5; }},
+];
+ 
+const GROWTH        = 1.15;
+const REBIRTH_BASE  = 1_000_000;
+const REBIRTH_GROW  = 1.20;
+const MAX_REBIRTHS  = 10;
+ 
+let money            = 0;
+let counts           = {};
+let boughtUpgrades   = new Set();
+let clickBonus       = 1;
+let incomeMultiplier = 1;
+let rebirths         = 0;
+ 
+ANIMALS.forEach(a => counts[a.id] = 0);
+ 
+const rebirthMult  = () => Math.pow(2, rebirths);
+const rebirthCost  = () => Math.ceil(REBIRTH_BASE * Math.pow(REBIRTH_GROW, rebirths));
+const currentCost  = a  => Math.ceil(a.baseCost * Math.pow(GROWTH, counts[a.id]));
+const totalAnimals = ()  => ANIMALS.reduce((s,a) => s + counts[a.id], 0);
+ 
+function getIncome() {
+  let inc = 0;
+  ANIMALS.forEach(a => { inc += counts[a.id] * a.income; });
+  return inc * incomeMultiplier * rebirthMult();
+}
+ 
+function fmt(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(2) + ' Mrd €';
+  if (n >= 1e6) return (n/1e6).toFixed(2) + ' Mio €';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + ' K €';
+  return Math.floor(n) + ' €';
+}
+ 
+function doClick(e) {
+  const reward = Math.ceil((clickBonus + totalAnimals() * 0.1) * rebirthMult());
+  money += reward;
+ 
+  const area = document.getElementById('click-area');
+  const el   = document.createElement('div');
+  el.className = 'float-coin';
+  el.textContent = '+' + fmt(reward);
+  el.style.left = (Math.random()*60+20) + '%';
+  el.style.top  = '15px';
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+ 
+  const rw = document.getElementById('click-reward');
+  rw.textContent = '+' + fmt(reward);
+  setTimeout(() => { rw.textContent = ''; }, 650);
+ 
+  updateUI();
+}
+ 
+function buyAnimal(id) {
+  const a    = ANIMALS.find(x => x.id === id);
+  const cost = currentCost(a);
+  if (money < cost) return;
+  money -= cost;
+  counts[id]++;
+  setNews(a.emoji + ' ' + a.name + ' Nr. ' + counts[id] + ' gekauft! Nächste kostet ' + fmt(currentCost(a)));
+  updateUI(); renderAnimals(); renderUpgrades();
+}
+ 
+function buyUpgrade(id) {
+  const u = UPGRADES.find(x => x.id === id);
+  if (money < u.cost || boughtUpgrades.has(id)) return;
+  money -= u.cost;
+  boughtUpgrades.add(id);
+  u.effect();
+  setNews('🏗️ ' + u.name + ' wurde gebaut!');
+  updateUI(); renderUpgrades();
+}
+ 
+function doRebirth() {
+  if (rebirths >= MAX_REBIRTHS) return;
+  const cost = rebirthCost();
+  if (money < cost) return;
+  rebirths++;
+  money            = 0;
+  counts           = {};
+  boughtUpgrades   = new Set();
+  clickBonus       = 1;
+  incomeMultiplier = 1;
+  ANIMALS.forEach(a => counts[a.id] = 0);
+  setNews('✨ Rebirth ' + rebirths + ' abgeschlossen! Alles ×' + rebirthMult() + ' — viel Erfolg!');
+  updateUI(); renderAnimals(); renderUpgrades(); renderRebirth();
+}
+ 
+function setNews(msg) { document.getElementById('news-bar').textContent = msg; }
+ 
+function updateUI() {
+  document.getElementById('money').textContent        = fmt(money);
+  document.getElementById('income-ps').textContent    = fmt(getIncome()) + '/s';
+  document.getElementById('total-animals').textContent = totalAnimals();
+  document.getElementById('rebirth-count').textContent = rebirths + ' / ' + MAX_REBIRTHS;
+}
+ 
+function renderAnimals() {
+  const tot  = totalAnimals();
+  const grid = document.getElementById('animals-grid');
+  grid.innerHTML = '';
+  ANIMALS.forEach(a => {
+    const locked = tot < a.unlockAt;
+    const cost   = currentCost(a);
+    const card   = document.createElement('div');
+    card.className = 'animal-card' + (locked ? ' locked' : '');
+    card.innerHTML = `
+      <span class="animal-emoji">${a.emoji}</span>
+      <div class="animal-name">${a.name}</div>
+      <div class="animal-owned">${counts[a.id]}× vorhanden</div>
+      <div class="animal-income">+${(a.income * rebirthMult()).toFixed(1)} €/s</div>
+      <button class="buy-btn" onclick="buyAnimal('${a.id}')" ${locked || money < cost ? 'disabled' : ''}>
+        ${locked ? '🔒 ab ' + a.unlockAt + ' Tieren' : fmt(cost)}
+      </button>`;
+    grid.appendChild(card);
+  });
+}
+ 
+function renderUpgrades() {
+  const grid = document.getElementById('upgrades-grid');
+  grid.innerHTML = '';
+  UPGRADES.forEach(u => {
+    const bought = boughtUpgrades.has(u.id);
+    const card   = document.createElement('div');
+    card.className = 'upg-card';
+    card.innerHTML = `
+      <div class="upg-name">${u.name}</div>
+      <div class="upg-desc">${u.desc}</div>
+      <button class="upg-btn ${bought ? 'bought' : ''}" onclick="buyUpgrade('${u.id}')" ${bought || money < u.cost ? 'disabled' : ''}>
+        ${bought ? '✓ Gebaut' : fmt(u.cost)}
+      </button>`;
+    grid.appendChild(card);
+  });
+}
+ 
+function renderRebirth() {
+  const box     = document.getElementById('rebirth-box');
+  const cost    = rebirthCost();
+  const mult    = rebirthMult();
+  const next    = Math.pow(2, rebirths + 1);
+  const canBuy  = money >= cost;
+  const maxed   = rebirths >= MAX_REBIRTHS;
+ 
+  let dots = '';
+  for (let i = 0; i < MAX_REBIRTHS; i++) {
+    const cls = i < rebirths ? 'done' : i === rebirths ? 'next' : '';
+    dots += `<div class="rebirth-dot ${cls}"></div>`;
+  }
+ 
+  box.innerHTML = `
+    <div class="rebirth-header">
+      <div class="rebirth-title">✨ Rebirth</div>
+      <div class="rebirth-badge">${rebirths} / ${MAX_REBIRTHS}</div>
+    </div>
+    <div class="rebirth-dots">${dots}</div>
+    <div class="rebirth-desc">
+      ${maxed
+        ? 'Maximaler Bonus erreicht! Aktuell: <strong>×' + mult + '</strong> auf alles.'
+        : 'Aktueller Bonus: <strong>×' + mult + '</strong>. Nach dem nächsten Rebirth: <strong>×' + next + '</strong> auf Einkommen & Klicks.<br>Kosten: <strong>' + fmt(cost) + '</strong> — danach startest du von vorne.'}
+    </div>
+    ${!maxed
+      ? `<button class="rebirth-btn" onclick="doRebirth()" ${canBuy ? '' : 'disabled'}>
+           ${canBuy ? '✨ Rebirth durchführen (' + fmt(cost) + ')' : 'Noch ' + fmt(cost - money) + ' fehlen'}
+         </button>`
+      : `<button class="rebirth-btn maxed" disabled>Maximaler Bonus erreicht — ×${mult} auf alles!</button>`}
+  `;
+}
+ 
+renderAnimals();
+renderUpgrades();
+renderRebirth();
+ 
+setInterval(() => {
+  const inc = getIncome();
+  if (inc > 0) { money += inc * 0.2; updateUI(); }
+}, 200);
+ 
+setInterval(() => {
+  renderAnimals();
+  renderUpgrades();
+  renderRebirth();
+}, 800);
+</script>
+</body>
+</html>
+ 
