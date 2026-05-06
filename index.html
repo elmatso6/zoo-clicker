@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zoo Tycoon Clicker</title>
+<title>Zoo Clicker</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -37,6 +37,22 @@
     padding: 2rem 1rem 1rem;
     position: relative;
   }
+ 
+  .menu-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+ 
+  .menu-btn:hover { background: var(--card); }
  
   header h1 {
     font-family: 'Fredoka One', cursive;
@@ -326,7 +342,8 @@
  
 <header>
   <h1>🦁 Zoo Clicker</h1>
-  <p>hallt's Maul!</p>
+  <p>Baue den größten Zoo der Welt!</p>
+  <a href="https://elmatso6.github.io/spiel-menu/" class="menu-btn">Spiele-Menü</a>
 </header>
  
 <div class="container">
